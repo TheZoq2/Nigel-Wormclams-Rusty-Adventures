@@ -20,7 +20,7 @@ fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
-    let window = video_subsystem.window("duns ballistic demo", 800, 600)
+    let window = video_subsystem.window("Nigel Wormclams Magic Adventure", 800, 600)
         .resizable()
         .build()
         .unwrap();
