@@ -1,8 +1,9 @@
 [package]
 name = "nigel_wormclans_rusty_adventures"
 version = "0.1.0"
-authors = ["TheZoq2 <frans.skarman@protonmail.com>"]
+authors = ["TheZoq2", "Hannes Tuhkala", "Emil Segerbäck", "Robin Sliwa"]
 edition = "2018"
+build = "build.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
