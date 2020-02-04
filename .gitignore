@@ -9,6 +9,7 @@
 
 /target
 **/*.rs.bk
+/Cargo.lock
 
 ### Krita
 *.kra-autosave.kra
