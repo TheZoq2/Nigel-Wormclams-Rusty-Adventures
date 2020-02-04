@@ -4,7 +4,19 @@ use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use std::time::{Duration, Instant};
 
+mod msg;
+mod model;
+
+use msg::{Cmd, Msg};
+use model::Model;
+
+fn update(msg: Msg, model: Model) -> (Model, Vec<Cmd>) {
+    (model, vec!())
+}
+
 fn main() {
+    let mut model = Model::init();
+
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
@@ -63,5 +75,12 @@ fn main() {
         canvas.set_draw_color(Color::RGB(255, 255, 80));
         // TODO: Draw game
         canvas.present();
+
+        let mut msgs = vec!();
+
+        while let Some(msg) = msgs.pop() {
+            let (new_model, _new_cmds) = update(msg, model);
+            model = new_model;
+        }
     }
 }
