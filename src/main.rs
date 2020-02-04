@@ -2,7 +2,6 @@ use std::time::Instant;
 use std::fs::File;
 
 use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 
 mod msg;
@@ -12,7 +11,7 @@ mod view;
 
 use msg::{Cmd, Msg};
 use model::Model;
-use input::{Key, Input};
+use input::{Input};
 
 fn update(msg: Msg, model: Model) -> (Model, Vec<Cmd>) {
     match msg {
@@ -52,26 +51,10 @@ fn main() {
                     break 'running
                 }
                 Event::KeyDown { keycode: Some(kc), .. } => {
-                    match kc {
-                        Keycode::Right => {
-                            msgs.push(Msg::Input(Input::KeyDown(Key::Left)));
-                        }
-                        Keycode::Left => {
-                            msgs.push(Msg::Input(Input::KeyDown(Key::Right)));
-                        }
-                        _ => {}
-                    }
+                    msgs.push(Msg::Input(Input::KeyDown(kc)))
                 }
                 Event::KeyUp { keycode: Some(kc), .. } => {
-                    match kc {
-                        Keycode::Right => {
-                            msgs.push(Msg::Input(Input::KeyUp(Key::Left)));
-                        }
-                        Keycode::Left => {
-                            msgs.push(Msg::Input(Input::KeyUp(Key::Right)));
-                        }
-                        _ => {}
-                    }
+                    msgs.push(Msg::Input(Input::KeyUp(kc)))
                 }
                 _ => {}
             }

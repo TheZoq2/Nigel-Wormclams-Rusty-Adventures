@@ -1,9 +1,6 @@
-pub enum Key {
-    Right,
-    Left,
-}
+use sdl2::keyboard::Keycode;
 
 pub enum Input {
-    KeyDown(Key),
-    KeyUp(Key)
+    KeyDown(Keycode),
+    KeyUp(Keycode)
 }

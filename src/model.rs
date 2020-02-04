@@ -1,4 +1,6 @@
-use crate::input::{Input, Key};
+use sdl2::keyboard::Keycode;
+
+use crate::input::{Input};
 
 #[derive(Default)]
 pub struct CurrentInput {
@@ -8,18 +10,19 @@ pub struct CurrentInput {
 impl CurrentInput {
     pub fn update(self, input: &Input) -> Self {
         match input {
-            Input::KeyDown(Key::Left) => {
+            Input::KeyDown(Keycode::Left) => {
                 Self{left: true, .. self}
             }
-            Input::KeyDown(Key::Right) => {
+            Input::KeyDown(Keycode::Right) => {
                 Self{right: true, .. self}
             }
-            Input::KeyUp(Key::Left) => {
+            Input::KeyUp(Keycode::Left) => {
                 Self{left: false, .. self}
             }
-            Input::KeyUp(Key::Right) => {
+            Input::KeyUp(Keycode::Right) => {
                 Self{right: false, .. self}
             }
+            _ => {self}
         }
     }
 }
