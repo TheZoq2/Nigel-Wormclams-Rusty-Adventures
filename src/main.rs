@@ -1,6 +1,8 @@
+use std::time::Instant;
+use std::fs::File;
+
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use std::time::{Instant};
 use sdl2::pixels::Color;
 
 mod msg;
@@ -88,8 +90,6 @@ fn main() {
             let (new_model, _new_cmds) = update(msg, model);
             model = new_model;
         }
-
-        println!("{}", model.pos);
 
         view::view(&model, &mut canvas);
 
