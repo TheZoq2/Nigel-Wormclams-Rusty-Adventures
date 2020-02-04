@@ -1,17 +1,22 @@
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::pixels::Color;
-use sdl2::rect::Rect;
 use std::time::{Duration, Instant};
+use sdl2::pixels::Color;
 
 mod msg;
 mod model;
+mod input;
+mod view;
 
 use msg::{Cmd, Msg};
 use model::Model;
+use input::{Key, Input};
 
 fn update(msg: Msg, model: Model) -> (Model, Vec<Cmd>) {
-    (model, vec!())
+    match msg {
+        Msg::Input(input) => (model.handle_input(&input), vec!()),
+        Msg::Tick(dt) => (model.tick(dt), vec!()),
+    }
 }
 
 fn main() {
@@ -37,6 +42,8 @@ fn main() {
 
     let mut event_pump = sdl_context.event_pump().unwrap();
     'running: loop {
+        let mut msgs = vec!();
+
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit {..} => {
@@ -45,10 +52,21 @@ fn main() {
                 Event::KeyDown { keycode: Some(kc), .. } => {
                     match kc {
                         Keycode::Right => {
-                            // TODO: Handle input
+                            msgs.push(Msg::Input(Input::KeyDown(Key::Left)));
                         }
                         Keycode::Left => {
-                            // TODO: Handle input
+                            msgs.push(Msg::Input(Input::KeyDown(Key::Right)));
+                        }
+                        _ => {}
+                    }
+                }
+                Event::KeyUp { keycode: Some(kc), .. } => {
+                    match kc {
+                        Keycode::Right => {
+                            msgs.push(Msg::Input(Input::KeyUp(Key::Left)));
+                        }
+                        Keycode::Left => {
+                            msgs.push(Msg::Input(Input::KeyUp(Key::Right)));
                         }
                         _ => {}
                     }
@@ -66,21 +84,17 @@ fn main() {
         while accumulated_time >= dt {
             accumulated_time -= dt;
 
-            // TODO: Run game loop
+            msgs.push(Msg::Tick(dt));
         }
-
-        canvas.set_draw_color(Color::RGB(0, 50, 80));
-        canvas.clear();
-
-        canvas.set_draw_color(Color::RGB(255, 255, 80));
-        // TODO: Draw game
-        canvas.present();
-
-        let mut msgs = vec!();
-
         while let Some(msg) = msgs.pop() {
             let (new_model, _new_cmds) = update(msg, model);
             model = new_model;
         }
+
+        println!("{}", model.pos);
+
+        view::view(&model, &mut canvas);
+
+        canvas.present();
     }
 }
