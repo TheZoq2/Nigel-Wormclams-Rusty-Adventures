@@ -1,6 +1,6 @@
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use std::time::{Duration, Instant};
+use std::time::{Instant};
 use sdl2::pixels::Color;
 
 mod msg;
@@ -74,8 +74,6 @@ fn main() {
                 _ => {}
             }
         }
-
-        let (screen_w, screen_h) = canvas.output_size().unwrap();
 
         let new_now = Instant::now();
         accumulated_time += new_now.duration_since(now).as_secs_f32();

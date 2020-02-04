@@ -10,5 +10,5 @@ pub fn view<T: RenderTarget>(model: &Model, canvas: &mut Canvas<T>) {
 
     canvas.set_draw_color(Color::RGB(255, 255, 80));
 
-    canvas.draw_rect(Rect::new(model.pos as i32, 0, 10, 10));
+    canvas.draw_rect(Rect::new(model.pos as i32, 0, 10, 10)).unwrap();
 }
