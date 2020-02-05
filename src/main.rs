@@ -8,6 +8,7 @@ mod msg;
 mod model;
 mod input;
 mod view;
+mod inventory;
 
 use msg::{Cmd, Msg};
 use model::Model;
