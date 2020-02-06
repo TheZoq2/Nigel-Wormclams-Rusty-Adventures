@@ -10,21 +10,33 @@ pub enum InventoryError {
 type Result<T> = std::result::Result<T, InventoryError>;
 
 
-pub trait Item {
-    fn effect(&self) -> Msg;
-}
+/**
+  A generic inventory content manager. Keeps track of items in the inventory and
+  allows addition and removal of them
+*/
 
 pub struct Inventory<T> {
     v: Vec<Option<T>>,
 }
 
 impl<T> Inventory<T> {
+    /**
+        Create a new inventory with the specified size
+    */
     pub fn new(size: usize) -> Self {
         Self {
             v: (0..size).map(|_| None).collect(),
         }
     }
 
+    pub fn content<'a>(&'a self) -> &'a [Option<T>] {
+        &self.v
+    }
+
+    /**
+      Insert the specified item into the first available slot. Returns
+      Inventory::Full if the inventory is full
+    */
     pub fn add_item(&mut self, item: T) -> Result<()> {
         for slot in self.v.iter_mut() {
             if slot.is_none() {
@@ -35,6 +47,9 @@ impl<T> Inventory<T> {
         Err(InventoryError::Full)
     }
 
+    /**
+      Set the item at the specified location to a new item
+    */
     pub fn set_item(&mut self, position: usize, item: Option<T>) -> Result<()> {
         if position >= self.v.len() {
             Err(InventoryError::OutOfBounds)
@@ -45,6 +60,9 @@ impl<T> Inventory<T> {
         }
     }
 
+    /**
+      Returns the content at the specified location in the inventory
+    */
     pub fn peek_item(&self, position: usize) -> Result<&Option<T>> {
         if position >= self.v.len() {
             Err(InventoryError::OutOfBounds)
@@ -54,6 +72,9 @@ impl<T> Inventory<T> {
         }
     }
 
+    /**
+      Removes and returns  the content at the the specified location in the inventory
+    */
     pub fn take_item(&mut self, position: usize) -> Result<Option<T>> {
         if position >= self.v.len() {
             Err(InventoryError::OutOfBounds)
@@ -62,9 +83,11 @@ impl<T> Inventory<T> {
             Ok(self.v[position].take())
         }
     }
+
+    pub fn capacity(&self) -> usize {
+        self.v.len()
+    }
 }
-
-
 
 
 #[cfg(test)]
