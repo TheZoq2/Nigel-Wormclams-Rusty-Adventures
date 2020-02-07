@@ -29,14 +29,16 @@ impl CurrentInput {
 
 pub struct Model {
     pub input: CurrentInput,
+    pub map: tiled::Map,
     pub pos: f32,
 }
 
 
 impl Model {
-    pub fn init() -> Self {
+    pub fn init(map: tiled::Map) -> Self {
         Self {
             input: CurrentInput::default(),
+            map,
             pos: 0.,
         }
     }
