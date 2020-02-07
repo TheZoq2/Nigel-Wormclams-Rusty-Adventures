@@ -3,6 +3,7 @@ use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 
 use crate::model::Model;
+use crate::inventory_ui::InventoryUi;
 
 pub fn view<T: RenderTarget>(model: &Model, canvas: &mut Canvas<T>, tileset_texture: &Texture) {
     canvas.set_draw_color(Color::RGB(0, 50, 80));
@@ -41,6 +42,8 @@ pub fn view<T: RenderTarget>(model: &Model, canvas: &mut Canvas<T>, tileset_text
             }
         }
     }
+
+    model.inventory.draw(canvas);
 
     canvas.set_draw_color(Color::RGB(255, 255, 80));
     canvas.draw_rect(Rect::new(model.pos as i32, 0, 10, 10)).unwrap();

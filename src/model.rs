@@ -1,6 +1,8 @@
 use sdl2::keyboard::Keycode;
 
 use crate::input::{Input};
+use crate::inventory_ui::InventoryUi;
+use crate::math::vec2;
 
 #[derive(Default)]
 pub struct CurrentInput {
@@ -31,6 +33,7 @@ pub struct Model {
     pub input: CurrentInput,
     pub map: tiled::Map,
     pub pos: f32,
+    pub inventory: InventoryUi,
 }
 
 
@@ -40,6 +43,7 @@ impl Model {
             input: CurrentInput::default(),
             map,
             pos: 0.,
+            inventory: InventoryUi::new(50, 5, vec2(30., 30.))
         }
     }
 

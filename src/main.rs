@@ -10,6 +10,8 @@ mod model;
 mod input;
 mod view;
 mod inventory;
+mod inventory_ui;
+mod math;
 
 use msg::{Cmd, Msg};
 use model::Model;
@@ -64,6 +66,21 @@ fn main() {
             match event {
                 Event::Quit {..} => {
                     break 'running
+                }
+                Event::MouseMotion{x, y, ..} => {
+                    msgs.push(Msg::Input(Input::MouseMove(x as f32, y as f32)))
+                }
+                Event::MouseButtonDown{mouse_btn, x, y, ..} => {
+                    let (x, y) = (x as f32, y as f32);
+                    match mouse_btn {
+                        sdl2::mouse::MouseButton::Left => {
+                            msgs.push(Msg::Input(Input::LeftClick(x, y)))
+                        }
+                        sdl2::mouse::MouseButton::Right => {
+                            msgs.push(Msg::Input(Input::RightClick(x, y)))
+                        }
+                        _ => {}
+                    }
                 }
                 Event::KeyDown { keycode: Some(kc), .. } => {
                     msgs.push(Msg::Input(Input::KeyDown(kc)))
