@@ -1,8 +1,9 @@
 use std::time::Instant;
-use std::fs::File;
+use std::path::Path;
 
 use sdl2::event::Event;
 use sdl2::pixels::Color;
+use sdl2::image::LoadTexture;
 
 mod msg;
 mod model;
@@ -22,8 +23,6 @@ fn update(msg: Msg, model: Model) -> (Model, Vec<Cmd>) {
 }
 
 fn main() {
-    let mut model = Model::init();
-
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
@@ -33,10 +32,25 @@ fn main() {
         .unwrap();
 
     let mut canvas = window.into_canvas().build().unwrap();
+    canvas.set_blend_mode(sdl2::render::BlendMode::Blend);
  
     canvas.set_draw_color(Color::RGB(0, 50, 80));
     canvas.clear();
     canvas.present();
+
+    let map_location = "assets/maps/overworld.tmx";
+    let map = tiled::parse_file(&Path::new(map_location))
+        .expect("Could not parse map file assets/maps/overworld.tmx");
+
+    // TODO: Support multiple tilesets and images
+    let tileset = &map.tilesets[0];
+    let tileset_image_file = &tileset.images[0].source;
+    let texture_creator = canvas.texture_creator();
+    let tileset_texture = texture_creator.load_texture(
+        String::from("assets/maps/") + tileset_image_file
+    ).unwrap();
+
+    let mut model = Model::init(map);
 
     let dt = 1. / 60.;
     let mut now = Instant::now();
@@ -75,7 +89,7 @@ fn main() {
             model = new_model;
         }
 
-        view::view(&model, &mut canvas);
+        view::view(&model, &mut canvas, &tileset_texture);
 
         canvas.present();
     }
