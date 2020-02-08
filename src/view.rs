@@ -1,14 +1,21 @@
-use sdl2::render::{Canvas, RenderTarget, Texture};
+use sdl2::render::{Canvas, RenderTarget};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 
 use crate::assets::Assets;
+use crate::math::vec2;
 use crate::model::Model;
-use crate::player;
 
 pub fn view<T: RenderTarget>(model: &Model, canvas: &mut Canvas<T>, assets: &Assets) {
     canvas.set_draw_color(Color::RGB(0, 50, 80));
     canvas.clear();
+
+    let (screen_w, screen_h) = canvas.output_size().unwrap();
+    let screen_center = vec2(
+        screen_w as f32 * 0.5,
+        screen_h as f32 * 0.5,
+    );
+    let cam_offset = screen_center - model.camera_pos;
 
     let tile_width = model.map.tile_width;
     let tile_height = model.map.tile_height;
@@ -33,8 +40,8 @@ pub fn view<T: RenderTarget>(model: &Model, canvas: &mut Canvas<T>, assets: &Ass
                     tile_height
                 );
                 let dest = Rect::new(
-                    col_i as i32 * tile_width as i32,
-                    row_i as i32 * tile_height as i32,
+                    col_i as i32 * tile_width as i32 + cam_offset.x as i32,
+                    row_i as i32 * tile_height as i32 + cam_offset.y as i32,
                     tile_width,
                     tile_height
                 );
@@ -46,15 +53,5 @@ pub fn view<T: RenderTarget>(model: &Model, canvas: &mut Canvas<T>, assets: &Ass
 
     model.inventory.draw(canvas);
 
-    canvas.set_draw_color(Color::RGB(255, 255, 80));
-    canvas.draw_rect(Rect::new(model.pos as i32, 0, 10, 10)).unwrap();
-
-    let player_pos = model.player.position;
-    let player_rect = Rect::new(
-        player_pos.x as i32,
-        player_pos.y as i32,
-        player::WIDTH,
-        player::HEIGHT,
-    );
-    canvas.copy(&assets.player_texture, None, player_rect).unwrap();
+    model.player.view(canvas, assets, cam_offset);
 }

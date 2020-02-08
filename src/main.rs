@@ -8,6 +8,7 @@ mod assets;
 mod msg;
 mod model;
 mod view;
+mod input;
 mod inventory;
 mod inventory_ui;
 mod item;

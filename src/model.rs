@@ -1,39 +1,13 @@
-use sdl2::keyboard::Keycode;
-
+use crate::input::CurrentInput;
 use crate::inventory_ui::InventoryUi;
+use crate::math::{vec2, Vec2};
 use crate::player::{Player, Equipment, Attributes};
-use crate::math::{Vec2, vec2};
 use crate::msg::{Cmd, Msg, KeyInput, MouseButtonChange};
-
-#[derive(Default)]
-pub struct CurrentInput {
-    left: bool,
-    right: bool,
-}
-impl CurrentInput {
-    pub fn update(self, input: &KeyInput) -> Self {
-        match input {
-            KeyInput::KeyDown(Keycode::Left) => {
-                Self{left: true, .. self}
-            }
-            KeyInput::KeyDown(Keycode::Right) => {
-                Self{right: true, .. self}
-            }
-            KeyInput::KeyUp(Keycode::Left) => {
-                Self{left: false, .. self}
-            }
-            KeyInput::KeyUp(Keycode::Right) => {
-                Self{right: false, .. self}
-            }
-            _ => {self}
-        }
-    }
-}
 
 pub struct Model {
     pub input: CurrentInput,
     pub map: tiled::Map,
-    pub pos: f32,
+    pub camera_pos: Vec2,
     pub inventory: InventoryUi,
     pub player: Player,
 }
@@ -57,7 +31,7 @@ impl Model {
         Self {
             input: CurrentInput::default(),
             map,
-            pos: 0.,
+            camera_pos: player.position,
             player,
             inventory: InventoryUi::new(50, 5, vec2(30., 30.), vec2(0., 0.))
         }
@@ -74,10 +48,9 @@ impl Model {
     }
 
     pub fn tick(self, dt: f32) -> Self {
-        let mut new_pos = self.pos;
-        new_pos += if self.input.right {1.} else {0.} * 100. * dt;
-        new_pos += if self.input.left {-1.} else {0.} * 100. * dt;
-        Self {pos: new_pos, .. self}
+        let new_player = self.player.tick(self.input, dt);
+        let new_camera_pos = new_player.position;
+        Self {player: new_player, camera_pos: new_camera_pos, .. self}
     }
 
     pub fn handle_input(self, input: &KeyInput) -> Self {
