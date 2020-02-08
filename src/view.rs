@@ -2,10 +2,11 @@ use sdl2::render::{Canvas, RenderTarget, Texture};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 
+use crate::assets::Assets;
 use crate::model::Model;
-use crate::inventory_ui::InventoryUi;
+use crate::player;
 
-pub fn view<T: RenderTarget>(model: &Model, canvas: &mut Canvas<T>, tileset_texture: &Texture) {
+pub fn view<T: RenderTarget>(model: &Model, canvas: &mut Canvas<T>, assets: &Assets) {
     canvas.set_draw_color(Color::RGB(0, 50, 80));
     canvas.clear();
 
@@ -38,7 +39,7 @@ pub fn view<T: RenderTarget>(model: &Model, canvas: &mut Canvas<T>, tileset_text
                     tile_height
                 );
 
-                canvas.copy(tileset_texture, src, dest).unwrap();
+                canvas.copy(&assets.tileset_texture, src, dest).unwrap();
             }
         }
     }
@@ -47,4 +48,13 @@ pub fn view<T: RenderTarget>(model: &Model, canvas: &mut Canvas<T>, tileset_text
 
     canvas.set_draw_color(Color::RGB(255, 255, 80));
     canvas.draw_rect(Rect::new(model.pos as i32, 0, 10, 10)).unwrap();
+
+    let player_pos = model.player.position;
+    let player_rect = Rect::new(
+        player_pos.x as i32,
+        player_pos.y as i32,
+        player::WIDTH,
+        player::HEIGHT,
+    );
+    canvas.copy(&assets.player_texture, None, player_rect).unwrap();
 }

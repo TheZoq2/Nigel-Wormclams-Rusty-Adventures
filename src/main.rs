@@ -3,16 +3,19 @@ use std::path::Path;
 
 use sdl2::event::Event;
 use sdl2::pixels::Color;
-use sdl2::image::LoadTexture;
 
-mod msg;
-mod model;
+mod assets;
 mod input;
-mod view;
 mod inventory;
 mod inventory_ui;
+mod item;
 mod math;
+mod model;
+mod msg;
+mod player;
+mod view;
 
+use assets::Assets;
 use msg::{Cmd, Msg};
 use model::Model;
 use input::{Input};
@@ -44,13 +47,8 @@ fn main() {
     let map = tiled::parse_file(&Path::new(map_location))
         .expect("Could not parse map file assets/maps/overworld.tmx");
 
-    // TODO: Support multiple tilesets and images
-    let tileset = &map.tilesets[0];
-    let tileset_image_file = &tileset.images[0].source;
     let texture_creator = canvas.texture_creator();
-    let tileset_texture = texture_creator.load_texture(
-        String::from("assets/maps/") + tileset_image_file
-    ).unwrap();
+    let assets = Assets::new(&texture_creator, &map);
 
     let mut model = Model::init(map);
 
@@ -106,7 +104,7 @@ fn main() {
             model = new_model;
         }
 
-        view::view(&model, &mut canvas, &tileset_texture);
+        view::view(&model, &mut canvas, &assets);
 
         canvas.present();
     }

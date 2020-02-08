@@ -3,6 +3,7 @@ use sdl2::keyboard::Keycode;
 use crate::input::{Input};
 use crate::inventory_ui::InventoryUi;
 use crate::math::vec2;
+use crate::player::{Player, Equipment, Attributes};
 
 #[derive(Default)]
 pub struct CurrentInput {
@@ -34,16 +35,31 @@ pub struct Model {
     pub map: tiled::Map,
     pub pos: f32,
     pub inventory: InventoryUi,
+    pub player: Player,
 }
 
 
 impl Model {
     pub fn init(map: tiled::Map) -> Self {
+        let player = Player {
+            name: "Nigel Wormclam".to_string(),
+            position: vec2(832., 1184.),
+            equipment: Equipment::new(),
+            attributes: Attributes {
+                strength: 30,
+                speed: 200,
+                agility: 24,
+                intellect: 14,
+                charisma: 9,
+                spirit: 16,
+            },
+        };
         Self {
             input: CurrentInput::default(),
             map,
             pos: 0.,
-            inventory: InventoryUi::new(50, 5, vec2(30., 30.))
+            inventory: InventoryUi::new(50, 5, vec2(30., 30.)),
+            player
         }
     }
 
