@@ -1,9 +1,9 @@
 use sdl2::keyboard::Keycode;
 
-use crate::input::{Input};
 use crate::inventory_ui::InventoryUi;
-use crate::math::vec2;
 use crate::player::{Player, Equipment, Attributes};
+use crate::math::{Vec2, vec2};
+use crate::msg::{Cmd, Msg, KeyInput, MouseButtonChange};
 
 #[derive(Default)]
 pub struct CurrentInput {
@@ -11,18 +11,18 @@ pub struct CurrentInput {
     right: bool,
 }
 impl CurrentInput {
-    pub fn update(self, input: &Input) -> Self {
+    pub fn update(self, input: &KeyInput) -> Self {
         match input {
-            Input::KeyDown(Keycode::Left) => {
+            KeyInput::KeyDown(Keycode::Left) => {
                 Self{left: true, .. self}
             }
-            Input::KeyDown(Keycode::Right) => {
+            KeyInput::KeyDown(Keycode::Right) => {
                 Self{right: true, .. self}
             }
-            Input::KeyUp(Keycode::Left) => {
+            KeyInput::KeyUp(Keycode::Left) => {
                 Self{left: false, .. self}
             }
-            Input::KeyUp(Keycode::Right) => {
+            KeyInput::KeyUp(Keycode::Right) => {
                 Self{right: false, .. self}
             }
             _ => {self}
@@ -58,8 +58,18 @@ impl Model {
             input: CurrentInput::default(),
             map,
             pos: 0.,
-            inventory: InventoryUi::new(50, 5, vec2(30., 30.)),
-            player
+            player,
+            inventory: InventoryUi::new(50, 5, vec2(30., 30.), vec2(0., 0.))
+        }
+    }
+
+    pub fn update(self, msg: Msg) -> (Self, Vec<Cmd>) {
+        match msg {
+            Msg::Ignored => (self, vec!()),
+            Msg::Input(input) => (self.handle_input(&input), vec!()),
+            Msg::Tick(dt) => (self.tick(dt), vec!()),
+            Msg::MouseMove{..} => (self, vec!()),
+            Msg::MouseButtonChange(event) => self.on_mouse_button(event),
         }
     }
 
@@ -70,7 +80,20 @@ impl Model {
         Self {pos: new_pos, .. self}
     }
 
-    pub fn handle_input(self, input: &Input) -> Self {
+    pub fn handle_input(self, input: &KeyInput) -> Self {
         Self{input: self.input.update(input), .. self}
+    }
+
+    pub fn on_mouse_move(self, position: Vec2) -> (Self, Vec<Cmd>) {
+        unimplemented!()
+    }
+    pub fn on_mouse_button(self, event: MouseButtonChange) -> (Self, Vec<Cmd>) {
+        if self.inventory.is_on_inventory(event.pos) {
+            let (inventory, cmds) = self.inventory.on_mouse_button(event);
+            (Self{inventory, .. self}, cmds)
+        }
+        else {
+            (self, vec!())
+        }
     }
 }

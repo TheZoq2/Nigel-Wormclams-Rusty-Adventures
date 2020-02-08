@@ -5,27 +5,19 @@ use sdl2::event::Event;
 use sdl2::pixels::Color;
 
 mod assets;
-mod input;
+mod msg;
+mod model;
+mod view;
 mod inventory;
 mod inventory_ui;
 mod item;
 mod math;
-mod model;
-mod msg;
 mod player;
-mod view;
 
 use assets::Assets;
-use msg::{Cmd, Msg};
+use msg::{Cmd, Msg, KeyInput, MouseButton, MouseButtonChange};
 use model::Model;
-use input::{Input};
-
-fn update(msg: Msg, model: Model) -> (Model, Vec<Cmd>) {
-    match msg {
-        Msg::Input(input) => (model.handle_input(&input), vec!()),
-        Msg::Tick(dt) => (model.tick(dt), vec!()),
-    }
-}
+use math::vec2;
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -65,26 +57,37 @@ fn main() {
                 Event::Quit {..} => {
                     break 'running
                 }
-                Event::MouseMotion{x, y, ..} => {
-                    msgs.push(Msg::Input(Input::MouseMove(x as f32, y as f32)))
+                Event::MouseMotion{x, y, mousestate: state, ..} => {
+                    msgs.push(Msg::MouseMove{
+                        pos: vec2(x as f32, y as f32),
+                        state,
+                    })
                 }
                 Event::MouseButtonDown{mouse_btn, x, y, ..} => {
-                    let (x, y) = (x as f32, y as f32);
+                    let pos = vec2(x as f32, y as f32);
                     match mouse_btn {
                         sdl2::mouse::MouseButton::Left => {
-                            msgs.push(Msg::Input(Input::LeftClick(x, y)))
+                            msgs.push(Msg::MouseButtonChange(MouseButtonChange{
+                                pos,
+                                button: MouseButton::Left,
+                                pressed: true
+                            }))
                         }
                         sdl2::mouse::MouseButton::Right => {
-                            msgs.push(Msg::Input(Input::RightClick(x, y)))
+                            msgs.push(Msg::MouseButtonChange(MouseButtonChange{
+                                pos,
+                                button: MouseButton::Right,
+                                pressed: true
+                            }))
                         }
                         _ => {}
                     }
                 }
                 Event::KeyDown { keycode: Some(kc), .. } => {
-                    msgs.push(Msg::Input(Input::KeyDown(kc)))
+                    msgs.push(Msg::Input(KeyInput::KeyDown(kc)))
                 }
                 Event::KeyUp { keycode: Some(kc), .. } => {
-                    msgs.push(Msg::Input(Input::KeyUp(kc)))
+                    msgs.push(Msg::Input(KeyInput::KeyUp(kc)))
                 }
                 _ => {}
             }
@@ -100,7 +103,7 @@ fn main() {
             msgs.push(Msg::Tick(dt));
         }
         while let Some(msg) = msgs.pop() {
-            let (new_model, _new_cmds) = update(msg, model);
+            let (new_model, _new_cmds) = model.update(msg);
             model = new_model;
         }
 
