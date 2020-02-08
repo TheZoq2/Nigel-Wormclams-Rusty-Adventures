@@ -6,8 +6,7 @@ use crate::item::{Helmet, ChestArmor, Trousers, Boots, Weapon};
 use crate::math::{vec2, Vec2};
 use crate::input::CurrentInput;
 
-pub const WIDTH: u32 = 30;
-pub const HEIGHT: u32 = 30;
+pub const SIZE: u32 = 30;
 
 #[derive(Clone)]
 pub struct Player {
@@ -34,10 +33,10 @@ impl Player {
     pub fn view<T: RenderTarget>(&self, canvas: &mut Canvas<T>, assets: &Assets, cam_offset: Vec2) {
         let player_screen_pos = self.position + cam_offset;
         let player_rect = Rect::new(
-            player_screen_pos.x as i32 - WIDTH as i32 / 2,
-            player_screen_pos.y as i32 - HEIGHT as i32 / 2,
-            WIDTH,
-            HEIGHT,
+            player_screen_pos.x as i32 - SIZE as i32 / 2,
+            player_screen_pos.y as i32 - SIZE as i32 / 2,
+            SIZE,
+            SIZE,
         );
         canvas.copy(&assets.player_texture, None, player_rect).unwrap();
     }

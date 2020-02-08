@@ -1,7 +1,8 @@
-use std::time::Instant;
 use std::path::Path;
+use std::time::Instant;
 
 use sdl2::event::Event;
+use sdl2::keyboard::Scancode;
 use sdl2::pixels::Color;
 
 mod assets;
@@ -16,9 +17,10 @@ mod math;
 mod player;
 
 use assets::Assets;
-use msg::{Cmd, Msg, KeyInput, MouseButton, MouseButtonChange};
-use model::Model;
+use input::CurrentInput;
 use math::vec2;
+use model::Model;
+use msg::{Cmd, Msg, KeyInput, MouseButton, MouseButtonChange};
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -100,8 +102,15 @@ fn main() {
 
         while accumulated_time >= dt {
             accumulated_time -= dt;
+            let keyboard_state = event_pump.keyboard_state();
+            let input = CurrentInput {
+                left: keyboard_state.is_scancode_pressed(Scancode::Left),
+                right: keyboard_state.is_scancode_pressed(Scancode::Right),
+                up: keyboard_state.is_scancode_pressed(Scancode::Up),
+                down: keyboard_state.is_scancode_pressed(Scancode::Down),
+            };
 
-            msgs.push(Msg::Tick(dt));
+            msgs.push(Msg::Tick(dt, input));
         }
         while let Some(msg) = msgs.pop() {
             let (new_model, _new_cmds) = model.update(msg);
