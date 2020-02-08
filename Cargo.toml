@@ -9,4 +9,4 @@ build = "build.rs"
 
 [dependencies]
 sdl2 = {version = "0.33", features = ["image", "mixer"]}
-tiled = "0.8.1"
+tiled = { git = "https://github.com/mattyhall/rs-tiled/" }

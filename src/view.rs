@@ -20,33 +20,31 @@ pub fn view<T: RenderTarget>(model: &Model, canvas: &mut Canvas<T>, assets: &Ass
     let tile_width = model.map.tile_width;
     let tile_height = model.map.tile_height;
 
-    // TODO: Calculate which tileset and image we should use
-    let tileset_width = model.map.tilesets[0].images[0].width as u32 / tile_width;
-
     for layer in &model.map.layers {
         for (row_i, row_tiles) in layer.tiles.iter().enumerate() {
             for (col_i, tile) in row_tiles.iter().enumerate() {
-                if *tile == 0 {
-                    continue;
+                if let Some(tileset) = model.map.get_tileset_by_gid(tile.gid) {
+                    let tileset_width = tileset.images[0].width as u32 / tile_width;
+
+                    let tile_id = tile.gid - tileset.first_gid;
+                    let tile_x = tile_id % tileset_width;
+                    let tile_y = tile_id / tileset_width;
+                    let src = Rect::new(
+                        (tile_x * tile_width) as i32,
+                        (tile_y * tile_height) as i32,
+                        tile_width,
+                        tile_height
+                    );
+                    let dest = Rect::new(
+                        col_i as i32 * tile_width as i32 + cam_offset.x as i32,
+                        row_i as i32 * tile_height as i32 + cam_offset.y as i32,
+                        tile_width,
+                        tile_height
+                    );
+
+                    let tex = &assets.tileset_textures[&tileset.first_gid];
+                    canvas.copy(tex, src, dest).unwrap();
                 }
-
-                let tile = tile - 1;
-                let tile_x = tile % tileset_width;
-                let tile_y = tile / tileset_width;
-                let src = Rect::new(
-                    (tile_x * tile_width) as i32,
-                    (tile_y * tile_height) as i32,
-                    tile_width,
-                    tile_height
-                );
-                let dest = Rect::new(
-                    col_i as i32 * tile_width as i32 + cam_offset.x as i32,
-                    row_i as i32 * tile_height as i32 + cam_offset.y as i32,
-                    tile_width,
-                    tile_height
-                );
-
-                canvas.copy(&assets.tileset_texture, src, dest).unwrap();
             }
         }
     }

@@ -1,6 +1,8 @@
-use crate::math::Vec2;
 use sdl2::keyboard::Keycode;
 use sdl2::mouse::MouseState;
+
+use crate::input::CurrentInput;
+use crate::math::Vec2;
 
 #[derive(Debug, Clone)]
 pub enum KeyInput {
@@ -27,7 +29,7 @@ pub enum Cmd {
 pub enum Msg {
     Ignored,
     Input(KeyInput),
-    Tick(f32),
+    Tick(f32, CurrentInput),
     MouseMove{pos: Vec2, state: MouseState},
     MouseButtonChange(MouseButtonChange),
 }
