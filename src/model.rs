@@ -61,48 +61,88 @@ impl Model {
     }
 
     pub fn tick(self, dt: f32, current_input: CurrentInput) -> Self {
-        let old_player_pos = self.player.position;
+        let old_pos = self.player.position;
+        let new_player = self.player.tick(current_input, dt);
 
-        let mut new_player = self.player.tick(current_input, dt);
+        let player_half_size = player::SIZE as f32 / 2.;
 
-        let offsets_to_check = [
-            vec2(-1., -1.), vec2(1., -1.), vec2(-1., 1.), vec2(1., 1.)
-        ];
-        let player_half_size = player::SIZE / 2;
-        for corner_offset in &offsets_to_check {
-            let pos = new_player.position + *corner_offset * player_half_size as f32;
-            let tile_col = pos.x as usize / self.map.tile_width as usize;
-            let tile_row = pos.y as usize / self.map.tile_height as usize;
+        let map = &self.map;
+        let tile_at = |pos: Vec2| -> tiled::LayerTile {
+            let tile_col = pos.x as usize / map.tile_width as usize;
+            let tile_row = pos.y as usize / map.tile_height as usize;
 
-            let tile = self.map.layers.last().unwrap().tiles[tile_row][tile_col];
+            map.layers.last().unwrap().tiles[tile_row][tile_col]
+        };
 
-            if !self.walkable_tiles.contains(&tile.gid) {
-                let inside_tile_x = pos.x % self.map.tile_width as f32;
-                let inside_tile_y = pos.y % self.map.tile_height as f32;
+        let walkable_tiles = &self.walkable_tiles;
+        let collision_at = |pos: Vec2| -> bool {
+            let tile = tile_at(pos);
+            !walkable_tiles.contains(&tile.gid)
+        };
 
-                let penetration_x = if corner_offset.x < 0. {
-                    inside_tile_x - self.map.tile_width as f32
-                } else {
-                    inside_tile_x
-                };
-                let penetration_y = if corner_offset.y < 0. {
-                    inside_tile_y - self.map.tile_height as f32
-                } else {
-                    inside_tile_y
-                };
+        let mut new_pos = new_player.position;
 
-                if penetration_x.abs() < penetration_y.abs() {
-                    new_player.position.x = old_player_pos.x;
-                } else {
-                    new_player.position.y = old_player_pos.y;
-                }
+        // Check x axis
+        {
+            let top = old_pos.y -player_half_size;
+            let bottom = old_pos.y + player_half_size;
+            let left = new_pos.x -player_half_size;
+            let right = new_pos.x + player_half_size;
+
+            let top_left_collision = collision_at(vec2(left, top));
+            let top_right_collision = collision_at(vec2(right, top));
+            let bottom_left_collision = collision_at(vec2(left, bottom));
+            let bottom_right_collision = collision_at(vec2(right, bottom));
+
+            let inside_tile_left = left % self.map.tile_width as f32;
+            let penetration_left = self.map.tile_width as f32 - inside_tile_left;
+            let penetration_right = right % self.map.tile_width as f32 + 1.;
+
+            // Left side
+            if top_left_collision || bottom_left_collision {
+                new_pos.x += penetration_left;
+            }
+
+            // Right side
+            if top_right_collision || bottom_right_collision {
+                new_pos.x -= penetration_right;
+            }
+        }
+
+        // Check y axis
+        {
+            let top = new_pos.y -player_half_size;
+            let bottom = new_pos.y + player_half_size;
+            let left = new_pos.x -player_half_size;
+            let right = new_pos.x + player_half_size;
+
+            let top_left_collision = collision_at(vec2(left, top));
+            let top_right_collision = collision_at(vec2(right, top));
+            let bottom_left_collision = collision_at(vec2(left, bottom));
+            let bottom_right_collision = collision_at(vec2(right, bottom));
+
+            let inside_tile_top = top % self.map.tile_height as f32;
+            let penetration_top = self.map.tile_height as f32 - inside_tile_top;
+            let penetration_bottom = bottom % self.map.tile_height as f32 + 1.;
+
+            // Top side
+            if top_left_collision || top_right_collision {
+                new_pos.y += penetration_top;
+            }
+
+            // Bottom side
+            if bottom_left_collision || bottom_right_collision {
+                new_pos.y -= penetration_bottom;
             }
         }
 
         let new_camera_pos = new_player.position;
 
         Self {
-            player: new_player,
+            player: Player {
+                position: new_pos,
+                .. new_player
+            },
             camera_pos: new_camera_pos,
             .. self
         }
