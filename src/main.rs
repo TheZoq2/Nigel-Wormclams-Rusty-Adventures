@@ -51,46 +51,51 @@ fn main() {
     let mut now = Instant::now();
     let mut accumulated_time = 0.;
 
+    macro_rules! update_model {
+        ($msg:expr) => {
+            let (new_model, _new_cmds) = model.update($msg);
+            model = new_model;
+        }
+    };
+
     let mut event_pump = sdl_context.event_pump().unwrap();
     'running: loop {
-        let mut msgs = vec!();
-
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit {..} => {
                     break 'running
                 }
                 Event::MouseMotion{x, y, mousestate: state, ..} => {
-                    msgs.push(Msg::MouseMove{
+                    update_model!(Msg::MouseMove{
                         pos: vec2(x as f32, y as f32),
                         state,
-                    })
+                    });
                 }
                 Event::MouseButtonDown{mouse_btn, x, y, ..} => {
                     let pos = vec2(x as f32, y as f32);
                     match mouse_btn {
                         sdl2::mouse::MouseButton::Left => {
-                            msgs.push(Msg::MouseButtonChange(MouseButtonChange{
+                            update_model!(Msg::MouseButtonChange(MouseButtonChange{
                                 pos,
                                 button: MouseButton::Left,
                                 pressed: true
-                            }))
+                            }));
                         }
                         sdl2::mouse::MouseButton::Right => {
-                            msgs.push(Msg::MouseButtonChange(MouseButtonChange{
+                            update_model!(Msg::MouseButtonChange(MouseButtonChange{
                                 pos,
                                 button: MouseButton::Right,
                                 pressed: true
-                            }))
+                            }));
                         }
                         _ => {}
                     }
                 }
                 Event::KeyDown { keycode: Some(kc), .. } => {
-                    msgs.push(Msg::Input(KeyInput::KeyDown(kc)))
+                    update_model!(Msg::Input(KeyInput::KeyDown(kc)));
                 }
                 Event::KeyUp { keycode: Some(kc), .. } => {
-                    msgs.push(Msg::Input(KeyInput::KeyUp(kc)))
+                    update_model!(Msg::Input(KeyInput::KeyUp(kc)));
                 }
                 _ => {}
             }
@@ -110,11 +115,7 @@ fn main() {
                 down: keyboard_state.is_scancode_pressed(Scancode::Down),
             };
 
-            msgs.push(Msg::Tick(dt, input));
-        }
-        while let Some(msg) = msgs.pop() {
-            let (new_model, _new_cmds) = model.update(msg);
-            model = new_model;
+            update_model!(Msg::Tick(dt, input));
         }
 
         view::view(&model, &mut canvas, &assets);
